@@ -5,6 +5,7 @@
   <title>A-DOMES | 위치정보시스템</title>
   <link rel="manifest" href="manifest.json">
   <style>
+    /* 기본 스타일 */
     body {
       font-family: Arial, sans-serif;
       font-size: 18px;
@@ -84,20 +85,10 @@
       cursor: pointer;
     }
     @media (max-width: 600px) {
-      input[type="text"] {
-        width: 90%;
-        font-size: 16px;
-      }
-      .button-group {
-        flex-direction: column;
-      }
-      .button-group button {
-        width: 100%;
-        font-size: 16px;
-      }
-      .modal-content {
-        width: 90%;
-      }
+      input[type="text"] { width: 90%; font-size: 16px; }
+      .button-group { flex-direction: column; }
+      .button-group button { width: 100%; font-size: 16px; }
+      .modal-content { width: 90%; }
     }
   </style>
 </head>
@@ -106,11 +97,13 @@
     <h2>A-DOMES 위치정보시스템</h2>
   </header>
 
+  <!-- 위치정보 전송 폼 -->
   <form id="locationForm"
-        action="https://script.google.com/macros/s/AKfycbyLXT2xluWWvnyeDOeN36I9s0hwe4vPOMulPYcKTTSCpyk2BLA05rctzI_ch8j03DTgig/exec"
+        action="https://script.google.com/macros/s/여기에_새배포_URL/exec"
         method="POST">
     <input type="text" name="phone" id="phone" placeholder="전화번호 입력">
 
+    <!-- 숨겨진 필드 -->
     <input type="hidden" name="status" id="statusField" value="정상">
     <input type="hidden" name="lat" id="lat">
     <input type="hidden" name="lng" id="lng">
@@ -122,6 +115,7 @@
     </div>
   </form>
 
+  <!-- 모달창 -->
   <div id="modal" class="modal">
     <div class="modal-content">
       <p id="modalMessage"></p>
@@ -141,6 +135,7 @@
       document.getElementById("modal").style.display = "none";
     }
 
+    // ✅ 위치 전송
     function sendLocation() {
       if (!navigator.geolocation) {
         showModal("이 브라우저에서는\n위치 정보를 지원하지 않습니다.");
@@ -155,21 +150,14 @@
           data.set("status", "정상");
           data.set("lat", position.coords.latitude || 0);
           data.set("lng", position.coords.longitude || 0);
-          data.set("time", new Date().toISOString());
+          data.set("time", new Date().toISOString()); // 전송시간
 
-          fetch(form.action, {
-            method: "POST",
-            body: data
-          })
-          .then(() => {
-            showModal("귀하의 위치정보가\n성공적으로 확인되었습니다.");
-          })
-          .catch(err => {
-            showModal("위치 정보를 전송하지 못했습니다: " + err.message);
-          });
+          fetch(form.action, { method: "POST", body: data })
+          .then(() => { showModal("귀하의 위치정보가\n성공적으로 확인되었습니다."); })
+          .catch(err => { showModal("위치 정보를 전송하지 못했습니다: " + err.message); });
 
           if (!intervalId) {
-            intervalId = setInterval(sendLocation, 5 * 60 * 1000);
+            intervalId = setInterval(sendLocation, 5 * 60 * 1000); // 5분마다 자동 전송
           }
         },
         function(error) {
@@ -178,6 +166,7 @@
       );
     }
 
+    // 🚫 위치 해제
     function stopLocation() {
       clearInterval(intervalId);
       const form = document.getElementById("locationForm");
@@ -185,19 +174,12 @@
 
       data.set("status", "해제");
 
-      fetch(form.action, {
-        method: "POST",
-        body: data
-      })
-      .then(() => {
-        showModal("위치정보가 해제되었습니다.");
-      })
-      .catch(err => {
-        showModal("위치정보 해제 실패: " + err.message);
-      });
+      fetch(form.action, { method: "POST", body: data })
+      .then(() => { showModal("위치정보가 해제되었습니다."); })
+      .catch(err => { showModal("위치정보 해제 실패: " + err.message); });
     }
 
-    // 서비스워커 등록
+    // 📌 서비스워커 등록
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/service-worker.js")
         .then(() => console.log("Service Worker registered"));
