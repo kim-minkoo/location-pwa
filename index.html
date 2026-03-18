@@ -143,7 +143,7 @@
 
     function sendLocation() {
       if (!navigator.geolocation) {
-        showModal("이 브라우저에서는 위치 정보를 지원하지 않습니다.");
+        showModal("이 브라우저에서는\n위치 정보를 지원하지 않습니다.");
         return;
       }
 
@@ -162,7 +162,7 @@
             body: data
           })
           .then(() => {
-            showModal("귀하의 위치정보가 성공적으로 확인되었습니다.");
+            showModal("귀하의 위치정보가\n성공적으로 확인되었습니다.");
           })
           .catch(err => {
             showModal("위치 정보를 전송하지 못했습니다: " + err.message);
