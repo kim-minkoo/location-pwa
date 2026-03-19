@@ -6,90 +6,19 @@
   <link rel="manifest" href="manifest.json">
   <style>
     /* 기본 스타일 */
-    body {
-      font-family: Arial, sans-serif;
-      font-size: 18px;
-      background-color: #f9f9f9;
-      margin: 0;
-      text-align: center;
-    }
-    header {
-      background-color: #2196F3;
-      padding: 20px;
-    }
-    header h2 {
-      font-size: 28px;
-      margin: 0;
-      font-weight: bold;
-      color: #fff;
-    }
-    input[type="text"] {
-      width: 100%;
-      max-width: 400px;
-      font-size: 18px;
-      padding: 8px;
-      margin: 20px auto;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      display: block;
-    }
-    .button-group {
-      display: flex;
-      gap: 10px;
-      max-width: 400px;
-      margin: 0 auto;
-    }
-    .button-group button {
-      flex: 1;
-      font-size: 18px;
-      padding: 10px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    #sendBtn {
-      background: linear-gradient(to bottom, #66bb6a, #4CAF50);
-      color: white;
-    }
-    #stopBtn {
-      background: linear-gradient(to bottom, #ef5350, #f44336);
-      color: white;
-    }
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0; top: 0;
-      width: 100%; height: 100%;
-      background-color: rgba(0,0,0,0.5);
-    }
-    .modal-content {
-      background-color: #fff;
-      margin: 20% auto;
-      padding: 20px;
-      width: 300px;
-      border-radius: 8px;
-      text-align: center;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-    .modal-content p {
-      font-size: 18px;
-      margin-bottom: 20px;
-    }
-    .modal-content button {
-      padding: 8px 16px;
-      background-color: #2196F3;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    @media (max-width: 600px) {
-      input[type="text"] { width: 90%; font-size: 16px; }
-      .button-group { flex-direction: column; }
-      .button-group button { width: 100%; font-size: 16px; }
-      .modal-content { width: 90%; }
-    }
+    body { font-family: Arial, sans-serif; font-size: 18px; background-color: #f9f9f9; margin: 0; text-align: center; }
+    header { background-color: #2196F3; padding: 20px; }
+    header h2 { font-size: 28px; margin: 0; font-weight: bold; color: #fff; }
+    input[type="text"] { width: 100%; max-width: 400px; font-size: 18px; padding: 8px; margin: 20px auto; border: 1px solid #ccc; border-radius: 4px; display: block; }
+    .button-group { display: flex; gap: 10px; max-width: 400px; margin: 0 auto; }
+    .button-group button { flex: 1; font-size: 18px; padding: 10px; border: none; border-radius: 6px; cursor: pointer; }
+    #sendBtn { background: linear-gradient(to bottom, #66bb6a, #4CAF50); color: white; }
+    #stopBtn { background: linear-gradient(to bottom, #ef5350, #f44336); color: white; }
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+    .modal-content { background-color: #fff; margin: 20% auto; padding: 20px; width: 300px; border-radius: 8px; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+    .modal-content p { font-size: 18px; margin-bottom: 20px; }
+    .modal-content button { padding: 8px 16px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    @media (max-width: 600px) { input[type="text"] { width: 90%; font-size: 16px; } .button-group { flex-direction: column; } .button-group button { width: 100%; font-size: 16px; } .modal-content { width: 90%; } }
   </style>
 </head>
 <body>
@@ -99,16 +28,9 @@
 
   <!-- 위치정보 전송 폼 -->
   <form id="locationForm"
-        action="https://script.google.com/macros/s/AKfycbwllR2TzAhfsC-jPD6pEwtfoyYCOx9hGL7Xi2-W2n_JJ3J6o4Yh-xkR54WSLsq-u8DEjQ/exec"
+        action="https://script.google.com/macros/s/AKfycbzuhjIs4tUd4_M9yVqbU_CatV5R9r9OCCBz5_xghVXdIFoMHPNZhmuBO5Pgu_Vfe-RA9Q/exec"
         method="POST">
     <input type="text" name="phone" id="phone" placeholder="전화번호 입력">
-
-    <!-- 숨겨진 필드 -->
-    <input type="hidden" name="status" id="statusField" value="정상">
-    <input type="hidden" name="lat" id="lat">
-    <input type="hidden" name="lng" id="lng">
-    <input type="hidden" name="time" id="time">
-
     <div class="button-group">
       <button type="button" id="sendBtn" onclick="sendLocation()">위치 전송</button>
       <button type="button" id="stopBtn" onclick="stopLocation()">위치정보 해제</button>
@@ -145,19 +67,27 @@
       navigator.geolocation.getCurrentPosition(
         function(position) {
           const form = document.getElementById("locationForm");
-          const data = new FormData(form);
+          const params = new URLSearchParams();
 
-          data.set("status", "정상");
-          data.set("lat", position.coords.latitude || 0);
-          data.set("lng", position.coords.longitude || 0);
-          data.set("time", new Date().toISOString()); // 전송시간
+          // 📌 클라이언트에서 보낼 데이터 구성
+          params.append("phone", document.getElementById("phone").value);
+          params.append("status", "정상");
+          params.append("lat", position.coords.latitude || 0);
+          params.append("lng", position.coords.longitude || 0);
+          params.append("time", new Date().toISOString());
 
-          fetch(form.action, { method: "POST", body: data })
+          // ✅ 서버(Apps Script)로 전송
+          fetch(form.action, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: params.toString()   // 반드시 문자열로 변환해야 정상 동작
+          })
           .then(() => { showModal("귀하의 위치정보가\n성공적으로 확인되었습니다."); })
           .catch(err => { showModal("위치 정보를 전송하지 못했습니다: " + err.message); });
 
+          // ✅ 5분마다 자동 갱신
           if (!intervalId) {
-            intervalId = setInterval(sendLocation, 5 * 60 * 1000); // 5분마다 자동 전송
+            intervalId = setInterval(sendLocation, 5 * 60 * 1000);
           }
         },
         function(error) {
@@ -170,11 +100,17 @@
     function stopLocation() {
       clearInterval(intervalId);
       const form = document.getElementById("locationForm");
-      const data = new FormData(form);
+      const params = new URLSearchParams();
 
-      data.set("status", "해제");
+      params.append("phone", document.getElementById("phone").value);
+      params.append("status", "해제");
+      params.append("time", new Date().toISOString());
 
-      fetch(form.action, { method: "POST", body: data })
+      fetch(form.action, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: params.toString()
+      })
       .then(() => { showModal("위치정보가 해제되었습니다."); })
       .catch(err => { showModal("위치정보 해제 실패: " + err.message); });
     }
