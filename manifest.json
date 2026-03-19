@@ -1,7 +1,7 @@
 {
   "name": "A-DOMES 위치정보시스템",
   "short_name": "A-DOMES",
-  "start_url": "/",
+  "start_url": "https://script.google.com/macros/s/AKfycby5AltWUN2ziDLtSA_rI49e_0cQfK56yGUcUl5oL55PPweYtulIRQ4htO39CZQ6-1IfzQ/exec",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2196F3",
