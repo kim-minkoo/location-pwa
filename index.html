@@ -28,7 +28,7 @@
 
   <!-- 위치정보 전송 폼 -->
   <form id="locationForm"
-        action="https://script.google.com/macros/s/AKfycbzuhjIs4tUd4_M9yVqbU_CatV5R9r9OCCBz5_xghVXdIFoMHPNZhmuBO5Pgu_Vfe-RA9Q/exec"
+        action="https://script.google.com/macros/s/AKfycbzj2ZRA0meUBg8ekkifXNLKMI9R8trfMAOzDNAMq0GeEsunbp9EXK7DJrMLi63qUEsp3A/exec"
         method="POST">
     <input type="text" name="phone" id="phone" placeholder="전화번호 입력">
     <div class="button-group">
@@ -80,7 +80,7 @@
           fetch(form.action, {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: params.toString()   // 반드시 문자열로 변환해야 정상 동작
+            body: params.toString()   // 반드시 문자열 변환
           })
           .then(() => { showModal("귀하의 위치정보가\n성공적으로 확인되었습니다."); })
           .catch(err => { showModal("위치 정보를 전송하지 못했습니다: " + err.message); });
@@ -102,6 +102,7 @@
       const form = document.getElementById("locationForm");
       const params = new URLSearchParams();
 
+      // 📌 해제 요청 데이터 구성
       params.append("phone", document.getElementById("phone").value);
       params.append("status", "해제");
       params.append("time", new Date().toISOString());
@@ -109,7 +110,7 @@
       fetch(form.action, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: params.toString()
+        body: params.toString()   // 반드시 문자열 변환
       })
       .then(() => { showModal("위치정보가 해제되었습니다."); })
       .catch(err => { showModal("위치정보 해제 실패: " + err.message); });
