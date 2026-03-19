@@ -5,7 +5,6 @@
   <title>A-DOMES | 위치정보시스템</title>
   <link rel="manifest" href="manifest.json">
   <style>
-    /* 기본 스타일 */
     body { font-family: Arial, sans-serif; font-size: 18px; background-color: #f9f9f9; margin: 0; text-align: center; }
     header { background-color: #2196F3; padding: 20px; }
     header h2 { font-size: 28px; margin: 0; font-weight: bold; color: #fff; }
@@ -28,9 +27,9 @@
 
   <!-- 위치정보 전송 폼 -->
   <form id="locationForm"
-        action="https://script.google.com/macros/s/AKfycbxoDzdpea6HOfHU9W8g0D0pLRPOYf0kLnAAHbdp1IKs6zE5Wdv6PcBlM8zoIoD-i9uWFA/exec"
+        action="https://script.google.com/macros/s/AKfycby5AltWUN2ziDLtSA_rI49e_0cQfK56yGUcUl5oL55PPweYtulIRQ4htO39CZQ6-1IfzQ/exec"
         method="POST">
-    <input type="text" name="phone" id="phone" placeholder="전화번호 입력">
+    <input type="text" name="phone" id="phone" placeholder="전화번호 또는 이름 입력">
     <div class="button-group">
       <button type="button" id="sendBtn" onclick="sendLocation()">위치 전송</button>
       <button type="button" id="stopBtn" onclick="stopLocation()">위치정보 해제</button>
@@ -57,7 +56,7 @@
       document.getElementById("modal").style.display = "none";
     }
 
-    // ✅ 위치 전송
+    // ✅ 위치 전송 (버튼 클릭 시)
     function sendLocation() {
       if (!navigator.geolocation) {
         showModal("이 브라우저에서는\n위치 정보를 지원하지 않습니다.");
@@ -69,25 +68,24 @@
           const form = document.getElementById("locationForm");
           const params = new URLSearchParams();
 
-          // 📌 클라이언트에서 보낼 데이터 구성
           params.append("phone", document.getElementById("phone").value);
           params.append("status", "정상");
           params.append("lat", position.coords.latitude || 0);
           params.append("lng", position.coords.longitude || 0);
           params.append("time", new Date().toISOString());
+          // 버튼 클릭 → auto 플래그 없음
 
-          // ✅ 서버(Apps Script)로 전송
           fetch(form.action, {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: params.toString()   // 반드시 문자열 변환
+            body: params.toString()
           })
-          .then(() => { showModal("귀하의 위치정보가\n성공적으로 확인되었습니다."); })
-          .catch(err => { showModal("위치 정보를 전송하지 못했습니다: " + err.message); });
+          .then(() => { showModal("위치정보가 성공적으로 전송되었습니다."); })
+          .catch(err => { showModal("위치 전송 실패: " + err.message); });
 
-          // ✅ 5분마다 자동 갱신
+          // ✅ 5분마다 자동 갱신 시작
           if (!intervalId) {
-            intervalId = setInterval(sendLocation, 5 * 60 * 1000);
+            intervalId = setInterval(autoUpdate, 5 * 60 * 1000);
           }
         },
         function(error) {
@@ -99,10 +97,11 @@
     // 🚫 위치 해제
     function stopLocation() {
       clearInterval(intervalId);
+      intervalId = null;
+
       const form = document.getElementById("locationForm");
       const params = new URLSearchParams();
 
-      // 📌 해제 요청 데이터 구성
       params.append("phone", document.getElementById("phone").value);
       params.append("status", "해제");
       params.append("time", new Date().toISOString());
@@ -110,10 +109,37 @@
       fetch(form.action, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: params.toString()   // 반드시 문자열 변환
+        body: params.toString()
       })
       .then(() => { showModal("위치정보가 해제되었습니다."); })
       .catch(err => { showModal("위치정보 해제 실패: " + err.message); });
+    }
+
+    // ✅ 자동갱신 (5분마다 실행)
+    function autoUpdate() {
+      if (!navigator.geolocation) return;
+
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          const form = document.getElementById("locationForm");
+          const params = new URLSearchParams();
+
+          params.append("phone", document.getElementById("phone").value);
+          params.append("status", "정상");
+          params.append("lat", position.coords.latitude || 0);
+          params.append("lng", position.coords.longitude || 0);
+          params.append("time", new Date().toISOString());
+          params.append("auto", "true"); // ✅ 자동갱신 플래그 추가
+
+          fetch(form.action, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: params.toString()
+          })
+          .then(() => { console.log("자동갱신 완료"); })
+          .catch(err => { console.error("자동갱신 실패:", err.message); });
+        }
+      );
     }
 
     // 📌 서비스워커 등록
